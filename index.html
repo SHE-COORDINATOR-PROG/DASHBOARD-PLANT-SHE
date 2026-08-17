@@ -247,7 +247,7 @@ async function extractText(file){
 }
 
 function mapRow(row){
-  return { id:row.id, category:row.category, fileName:row.file_name || "", holder:row.holder || "", tanggalTerbit:row.tanggal_terbit || "" };
+  return { id:Number(row.id), category:row.category, fileName:row.file_name || "", holder:row.holder || "", tanggalTerbit:row.tanggal_terbit || "" };
 }
 
 async function readErr(r){

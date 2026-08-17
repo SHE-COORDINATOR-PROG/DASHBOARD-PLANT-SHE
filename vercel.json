@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "api/certificates.js": {
+      "maxDuration": 10
+    }
+  }
+}

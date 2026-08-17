@@ -119,10 +119,16 @@
   .del{background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:17px;padding:4px 6px;}
   .del:hover{color:var(--red);}
 
-  .summary{margin-top:26px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 20px;}
-  .summary h3{font-size:14px;font-weight:700;margin:0 0 10px;}
-  .summary ol{margin:0;padding-left:20px;font-family:'IBM Plex Mono',monospace;font-size:13.5px;line-height:2.1;}
-  .summary li span{color:var(--text-dim);font-family:'Inter',sans-serif;font-size:12.5px;margin-left:8px;}
+  .summary{margin-top:26px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 20px;overflow-x:auto;}
+  .summary h3{font-size:14px;font-weight:700;margin:0 0 12px;}
+  .sum-table{width:100%;border-collapse:collapse;font-size:13px;}
+  .sum-table th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:0.4px;color:var(--text-dim);font-weight:700;padding:0 10px 8px;border-bottom:1px solid var(--line);white-space:nowrap;}
+  .sum-table td{padding:9px 10px;border-bottom:1px solid var(--line);white-space:nowrap;}
+  .sum-table tr:last-child td{border-bottom:none;}
+  .sum-table td.no{color:var(--text-dim);width:1%;}
+  .sum-table td.date{font-family:'IBM Plex Mono',monospace;font-weight:600;}
+  .sum-table td.name{font-weight:600;white-space:normal;}
+  .sum-table td.cat{color:var(--text-dim);}
   .loading{font-size:12.5px;color:var(--green-deep);margin-top:10px;}
 
   @media (max-width:760px){
@@ -166,7 +172,12 @@
       <div class="cards" id="dashCards"></div>
       <div class="summary" id="dashSummaryWrap" style="display:none;">
         <h3>Urutan expired yang akan datang</h3>
-        <ol id="dashSummaryList"></ol>
+        <table class="sum-table">
+          <thead>
+            <tr><th>No</th><th>Expired</th><th>Nama</th><th>Kategori</th><th>Status</th></tr>
+          </thead>
+          <tbody id="dashSummaryList"></tbody>
+        </table>
       </div>
     </div>
 
@@ -193,7 +204,7 @@ const CATEGORIES = [
   { key:"CRANE_INSPECTOR", label:"Crane Inspector", full:"Inspektur Alat Angkat (Crane)", years:3 },
   { key:"OVERHEAD_CRANE_OPERATOR", label:"Overhead Crane Operator", full:"Operator Overhead Crane", years:3 },
   { key:"RIGGER", label:"Rigger", full:"Rigger", years:3 },
-  { key:"OPERATOR_CRANE", label:"Operator Crane", full:"Operator Crane", years:3 },
+  { key:"OPERATOR_CRANE", label:"Operator Crane", full:"Operator Crane", years:5 },
   { key:"KETINGGIAN", label:"Bekerja di Ketinggian", full:"Tenaga Kerja Bekerja di Ketinggian", years:5 },
   { key:"OPERATOR_K3_LISTRIK", label:"Operator K3 Listrik", full:"Operator K3 Listrik", years:5 },
   { key:"TEKNISI_K3_LISTRIK", label:"Teknisi K3 Listrik", full:"Teknisi K3 Listrik", years:5 },
@@ -544,7 +555,10 @@ function renderAll(){
   const summaryList = document.getElementById("dashSummaryList");
   if(upcoming.length){
     summaryWrap.style.display = "block";
-    summaryList.innerHTML = upcoming.map(c=>`<li>${formatDMY(c.calc.expiry)}<span>${c.item.holder} &mdash; ${c.calc.cat.label}</span></li>`).join("");
+    summaryList.innerHTML = upcoming.map((c,i)=>{
+      const color = gaugeColor(c.calc.statusClass);
+      return `<tr><td class="no">${i+1}</td><td class="date">${formatDMY(c.calc.expiry)}</td><td class="name">${c.item.holder}</td><td class="cat">${c.calc.cat.label}</td><td><span class="status-pill ${c.calc.statusClass}" style="margin-left:0;">${c.calc.statusLabel}</span></td></tr>`;
+    }).join("");
   } else {
     summaryWrap.style.display = "none";
   }

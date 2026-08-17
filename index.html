@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
 <style>
   :root{
     --bg: #EFF8F2;
@@ -131,21 +132,80 @@
   .sum-table td.cat{color:var(--text-dim);}
   .loading{font-size:12.5px;color:var(--green-deep);margin-top:10px;}
 
+  /* ===== Settings / certification status page ===== */
+  .settings-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin:16px 0 22px;}
+  .settings-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px;}
+  .settings-card .sc-head{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+  .settings-card .sc-badge{width:24px;height:24px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:700;flex-shrink:0;}
+  .settings-card .sc-title{font-size:13px;font-weight:700;}
+  .settings-card .sc-row{display:flex;align-items:center;justify-content:space-between;font-size:12.5px;color:var(--text-dim);margin-bottom:6px;}
+  .settings-card .sc-row b{color:var(--text);font-family:'IBM Plex Mono',monospace;}
+  .settings-card label{font-size:11px;color:var(--text-dim);display:block;margin-top:8px;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.3px;font-weight:600;}
+  .settings-card input[type=number]{width:100%;background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:7px 9px;font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--text);}
+  .settings-card .sc-bar{height:8px;border-radius:6px;background:var(--panel-2);overflow:hidden;margin-top:10px;}
+  .settings-card .sc-bar-fill{height:100%;border-radius:6px;}
+
+  .chart-wrap{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 22px 26px;margin-bottom:24px;overflow-x:auto;}
+  .chart-wrap h3{font-size:14px;font-weight:700;margin:0 0 4px;}
+  .chart-wrap .chart-sub{font-size:12px;color:var(--text-dim);margin-bottom:18px;}
+  .bar-chart{display:flex;align-items:flex-end;gap:22px;min-height:220px;padding:0 4px;min-width:640px;}
+  .bar-group{display:flex;flex-direction:column;align-items:center;flex:1;min-width:44px;}
+  .bar-pair{display:flex;align-items:flex-end;gap:5px;height:180px;}
+  .bar-3d{position:relative;width:20px;border-radius:6px 6px 3px 3px;box-shadow:0 6px 14px -4px rgba(0,0,0,0.35), inset -3px 0 6px rgba(255,255,255,0.25), inset 3px 0 6px rgba(0,0,0,0.15);display:flex;align-items:flex-start;justify-content:center;transition:height .4s ease;}
+  .bar-3d .bv{position:absolute;top:-18px;font-size:10.5px;font-weight:700;font-family:'IBM Plex Mono',monospace;color:var(--text);white-space:nowrap;}
+  .bar-sudah{background:linear-gradient(180deg,#34D399,#059669);}
+  .bar-belum{background:linear-gradient(180deg,#FCA5A5,#DC2626);}
+  .bar-group .bg-label{font-size:10.5px;color:var(--text-dim);margin-top:9px;text-align:center;max-width:90px;line-height:1.25;font-weight:600;}
+  .chart-legend{display:flex;gap:18px;margin-top:16px;font-size:12px;color:var(--text-dim);}
+  .chart-legend span{display:inline-flex;align-items:center;gap:6px;}
+  .chart-legend i{width:11px;height:11px;border-radius:3px;display:inline-block;}
+  .chart-legend .li-sudah{background:linear-gradient(180deg,#34D399,#059669);}
+  .chart-legend .li-belum{background:linear-gradient(180deg,#FCA5A5,#DC2626);}
+
+  .export-btn{background:linear-gradient(135deg,#17A34A,#0F7C39);color:#fff;border:none;border-radius:10px;padding:10px 16px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:8px;box-shadow:0 4px 10px -2px rgba(15,124,57,0.45);}
+  .export-btn:hover{filter:brightness(1.06);}
+  .export-btn:disabled{opacity:0.6;cursor:default;}
+
+  /* ===== Mobile off-canvas sidebar ===== */
+  .hamburger{display:none;}
+  .sidebar-backdrop{display:none;}
   @media (max-width:760px){
-    .layout{flex-direction:column;}
-    .sidebar{width:100%;flex-direction:row;flex-wrap:wrap;padding:10px;}
-    .brand{border-bottom:none;margin-bottom:0;padding:4px;}
-    .menu-label{display:none;}
-    nav{flex-direction:row;overflow-x:auto;width:100%;}
-    .navitem{white-space:nowrap;}
+    .layout{flex-direction:column;position:relative;}
+    .hamburger{
+      display:flex;align-items:center;justify-content:center;
+      width:40px;height:40px;border-radius:10px;background:var(--panel);
+      border:1px solid var(--line);position:fixed;top:14px;left:14px;z-index:1002;
+      cursor:pointer;box-shadow:0 3px 10px rgba(0,0,0,0.12);flex-direction:column;gap:4px;
+    }
+    .hamburger span{display:block;width:18px;height:2px;background:var(--text);border-radius:2px;}
+    .sidebar{
+      position:fixed;top:0;left:0;height:100vh;z-index:1001;width:min(82vw,290px);
+      transform:translateX(-105%);transition:transform .25s ease;
+      flex-direction:column;flex-wrap:nowrap;box-shadow:4px 0 24px rgba(0,0,0,0.18);
+      overflow-y:auto;
+    }
+    .sidebar.open{transform:translateX(0);}
+    .sidebar-backdrop{
+      display:block;position:fixed;inset:0;background:rgba(15,30,20,0.4);
+      z-index:1000;opacity:0;pointer-events:none;transition:opacity .2s ease;
+    }
+    .sidebar-backdrop.show{opacity:1;pointer-events:auto;}
+    .brand{border-bottom:1px solid var(--line);margin-bottom:14px;padding:6px 6px 18px;}
+    .menu-label{display:block;}
+    nav{flex-direction:column;overflow-x:visible;overflow-y:auto;width:100%;}
+    .navitem{white-space:normal;}
+    .main{padding:70px 16px 60px;}
     .stat-row{grid-template-columns:repeat(2,1fr);}
+    .bar-chart{min-width:520px;}
   }
 </style>
 </head>
 <body>
 
+<div class="hamburger" id="hamburgerBtn" aria-label="Buka menu"><span></span><span></span><span></span></div>
+<div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 <div class="layout">
-  <div class="sidebar">
+  <div class="sidebar" id="sidebarEl">
     <div class="brand">
       <img src="data:image/png;base64,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" alt="Logo KPP Mining">
       <div class="div"></div>
@@ -154,6 +214,7 @@
     <div class="menu-label">Main menu</div>
     <nav id="navRoot">
       <div class="navitem active" data-page="dashboard"><div class="badge" style="background:rgba(255,255,255,0.22);">DB</div><div>Dashboard</div></div>
+      <div class="navitem" data-page="settings"><div class="badge" style="background:#EDE9FE;color:#7C3AED;">ST</div><div>Setting</div></div>
       <div id="navCategories"></div>
     </nav>
   </div>
@@ -181,6 +242,28 @@
       </div>
     </div>
 
+    <div class="page" id="page-settings">
+      <div class="topcard">
+        <div>
+          <h2><span class="dot" style="background:#7C3AED;"></span>Setting Status Sertifikasi</h2>
+          <div class="meta">Atur target jumlah personil per keahlian, lalu pantau siapa yang sudah &amp; belum tersertifikasi.</div>
+        </div>
+        <button class="export-btn" id="btnExportPpt">⇩ Export Laporan (PPT)</button>
+      </div>
+
+      <div class="chart-wrap">
+        <h3>Pencapaian Sertifikasi per Keahlian</h3>
+        <div class="chart-sub">Perbandingan jumlah personil yang sudah vs belum tersertifikasi (berdasarkan target yang diatur di bawah).</div>
+        <div class="bar-chart" id="achievementChart"></div>
+        <div class="chart-legend">
+          <span><i class="li-sudah"></i> Sudah tersertifikasi</span>
+          <span><i class="li-belum"></i> Belum tersertifikasi</span>
+        </div>
+      </div>
+
+      <div class="settings-grid" id="settingsGrid"></div>
+    </div>
+
     <div id="categoryPages"></div>
 
   </div>
@@ -203,7 +286,7 @@ const CATEGORIES = [
   { key:"POP", label:"POP", full:"Pengawas Operasional Pratama", years:5 },
   { key:"CRANE_INSPECTOR", label:"Crane Inspector", full:"Inspektur Alat Angkat (Crane)", years:3 },
   { key:"OVERHEAD_CRANE_OPERATOR", label:"Overhead Crane Operator", full:"Operator Overhead Crane", years:3 },
-  { key:"RIGGER", label:"Rigger", full:"Rigger", years:3 },
+  { key:"RIGGER", label:"Rigger", full:"Rigger", years:4 },
   { key:"OPERATOR_CRANE", label:"Operator Crane", full:"Operator Crane", years:5 },
   { key:"KETINGGIAN", label:"Bekerja di Ketinggian", full:"Tenaga Kerja Bekerja di Ketinggian", years:5 },
   { key:"OPERATOR_K3_LISTRIK", label:"Operator K3 Listrik", full:"Operator K3 Listrik", years:5 },
@@ -562,14 +645,232 @@ function renderAll(){
   } else {
     summaryWrap.style.display = "none";
   }
+
+  renderSettingsPage();
 }
+
+/* ===== Settings: target sertifikasi & chart pencapaian ===== */
+const TARGETS_KEY = "certTargets_v1";
+
+function loadTargets(){
+  try{
+    const raw = localStorage.getItem(TARGETS_KEY);
+    return raw ? JSON.parse(raw) : {};
+  }catch(e){ return {}; }
+}
+function saveTargets(targets){
+  try{ localStorage.setItem(TARGETS_KEY, JSON.stringify(targets)); }catch(e){}
+}
+let certTargets = loadTargets();
+
+function getSudahCount(catKey){
+  return items.filter(it=>it.category===catKey).length;
+}
+
+function renderSettingsPage(){
+  const grid = document.getElementById("settingsGrid");
+  const chart = document.getElementById("achievementChart");
+  if(!grid || !chart) return;
+
+  grid.innerHTML = CATEGORIES.map((cat,idx)=>{
+    const pal = paletteFor(idx);
+    const sudah = getSudahCount(cat.key);
+    const target = certTargets[cat.key] || 0;
+    const belum = Math.max(target - sudah, 0);
+    const pct = target>0 ? Math.min(100, Math.round((sudah/target)*100)) : 0;
+    const barColor = pct>=100 ? "#17A34A" : pct>=50 ? "#D97706" : "#DC2626";
+    return `
+      <div class="settings-card">
+        <div class="sc-head">
+          <div class="sc-badge" style="background:${pal.bg};color:${pal.fg};">${initials(cat)}</div>
+          <div class="sc-title">${cat.label}</div>
+        </div>
+        <div class="sc-row"><span>Sudah tersertifikasi</span><b>${sudah}</b></div>
+        <div class="sc-row"><span>Belum tersertifikasi</span><b>${belum}</b></div>
+        <label>Target jumlah personil</label>
+        <input type="number" min="0" data-target-cat="${cat.key}" value="${target}">
+        <div class="sc-bar"><div class="sc-bar-fill" style="width:${pct}%;background:${barColor};"></div></div>
+      </div>
+    `;
+  }).join("");
+
+  grid.querySelectorAll("input[data-target-cat]").forEach(el=>{
+    el.addEventListener("change",(e)=>{
+      const key = e.target.dataset.targetCat;
+      const val = Math.max(0, parseInt(e.target.value)||0);
+      certTargets[key] = val;
+      saveTargets(certTargets);
+      renderSettingsPage();
+    });
+  });
+
+  const maxVal = Math.max(1, ...CATEGORIES.map(cat=>{
+    const sudah = getSudahCount(cat.key);
+    const target = certTargets[cat.key] || 0;
+    const belum = Math.max(target - sudah, 0);
+    return Math.max(sudah, belum);
+  }));
+
+  chart.innerHTML = CATEGORIES.map(cat=>{
+    const sudah = getSudahCount(cat.key);
+    const target = certTargets[cat.key] || 0;
+    const belum = Math.max(target - sudah, 0);
+    const hSudah = Math.max(4, Math.round((sudah/maxVal)*180));
+    const hBelum = Math.max(4, Math.round((belum/maxVal)*180));
+    return `
+      <div class="bar-group">
+        <div class="bar-pair">
+          <div class="bar-3d bar-sudah" style="height:${hSudah}px;"><span class="bv">${sudah}</span></div>
+          <div class="bar-3d bar-belum" style="height:${hBelum}px;"><span class="bv">${belum}</span></div>
+        </div>
+        <div class="bg-label">${cat.label}</div>
+      </div>
+    `;
+  }).join("");
+}
+
+/* ===== Export laporan ke PowerPoint (PPTX) ===== */
+async function exportReportToPpt(){
+  const btn = document.getElementById("btnExportPpt");
+  if(btn){ btn.disabled = true; btn.textContent = "Menyusun laporan..."; }
+  try{
+    const pptx = new PptxGenJS();
+    pptx.defineLayout({ name:"LAYOUT_16x9", width:13.33, height:7.5 });
+    pptx.layout = "LAYOUT_16x9";
+
+    const GREEN = "17A34A";
+    const GREEN_DEEP = "0F7C39";
+    const RED = "DC2626";
+    const AMBER = "D97706";
+    const TEXT = "1F2A24";
+    const DIM = "718077";
+
+    const computedAll = items.map(it => ({ item: it, calc: computeRow(it) }));
+    const expiredN = computedAll.filter(c=>c.calc.statusClass==="expired").length;
+    const soonN = computedAll.filter(c=>c.calc.statusClass==="soon").length;
+    const okN = computedAll.filter(c=>c.calc.statusClass==="ok").length;
+
+    // Slide 1: Cover
+    let s = pptx.addSlide();
+    s.background = { color: "EFF8F2" };
+    s.addText("Laporan Monitoring Sertifikat Keahlian", { x:0.7, y:2.6, w:11.9, h:1.2, fontSize:32, bold:true, color:TEXT, fontFace:"Arial" });
+    s.addText("KPP Mining — " + new Date().toLocaleDateString("id-ID",{day:"2-digit",month:"long",year:"numeric"}), { x:0.7, y:3.7, w:11.9, h:0.6, fontSize:16, color:DIM, fontFace:"Arial" });
+    s.addShape(pptx.ShapeType.rect, { x:0.7, y:2.4, w:1.2, h:0.08, fill:{color:GREEN} });
+
+    // Slide 2: Ringkasan statistik
+    s = pptx.addSlide();
+    s.background = { color: "FFFFFF" };
+    s.addText("Ringkasan Statistik", { x:0.5, y:0.35, w:12, h:0.6, fontSize:24, bold:true, color:TEXT, fontFace:"Arial" });
+    const statBoxes = [
+      { label:"Total Sertifikat", val:items.length, color:"2563EB", bg:"E8EFFD" },
+      { label:"Sudah Expired", val:expiredN, color:RED, bg:"FCE8E7" },
+      { label:"Akan Expired (<=90 hari)", val:soonN, color:AMBER, bg:"FEF3DA" },
+      { label:"Masih Berlaku", val:okN, color:GREEN_DEEP, bg:"E3F6EA" }
+    ];
+    statBoxes.forEach((b,i)=>{
+      const x = 0.5 + i*3.1;
+      s.addShape(pptx.ShapeType.roundRect, { x, y:1.3, w:2.85, h:1.6, rectRadius:0.12, fill:{color:b.bg}, line:{type:"none"} });
+      s.addText(String(b.val), { x, y:1.45, w:2.85, h:0.8, fontSize:34, bold:true, color:b.color, align:"center", fontFace:"Arial" });
+      s.addText(b.label, { x, y:2.25, w:2.85, h:0.5, fontSize:11, color:b.color, align:"center", fontFace:"Arial" });
+    });
+
+    // Slide 3: Chart pencapaian sertifikasi (native pptx bar chart)
+    const chartLabels = CATEGORIES.map(c=>c.label);
+    const chartSudah = CATEGORIES.map(c=>getSudahCount(c.key));
+    const chartBelum = CATEGORIES.map(c=>Math.max((certTargets[c.key]||0) - getSudahCount(c.key), 0));
+    s = pptx.addSlide();
+    s.addText("Pencapaian Sertifikasi per Keahlian", { x:0.5, y:0.3, w:12, h:0.5, fontSize:22, bold:true, color:TEXT, fontFace:"Arial" });
+    s.addChart(pptx.ChartType.bar, [
+      { name:"Sudah Tersertifikasi", labels: chartLabels, values: chartSudah },
+      { name:"Belum Tersertifikasi", labels: chartLabels, values: chartBelum }
+    ], {
+      x:0.4, y:0.9, w:12.5, h:6.2,
+      barDir:"col", barGrouping:"clustered",
+      chartColors:[GREEN, RED],
+      showLegend:true, legendPos:"b",
+      showTitle:false, showValue:true,
+      catAxisLabelFontSize:9, valAxisLabelFontSize:9, dataLabelFontSize:9,
+      catAxisLabelColor:TEXT, valAxisLabelColor:TEXT
+    });
+
+    // Slide 4: Tabel status per kategori
+    s = pptx.addSlide();
+    s.addText("Status Sertifikasi per Kategori", { x:0.5, y:0.3, w:12, h:0.5, fontSize:22, bold:true, color:TEXT, fontFace:"Arial" });
+    const tableRows = [[
+      { text:"Kategori", options:{bold:true, fill:{color:"F3F6F4"}, color:TEXT} },
+      { text:"Sudah", options:{bold:true, fill:{color:"F3F6F4"}, color:TEXT} },
+      { text:"Belum", options:{bold:true, fill:{color:"F3F6F4"}, color:TEXT} },
+      { text:"Target", options:{bold:true, fill:{color:"F3F6F4"}, color:TEXT} }
+    ]];
+    CATEGORIES.forEach(cat=>{
+      const sudah = getSudahCount(cat.key);
+      const target = certTargets[cat.key] || 0;
+      const belum = Math.max(target - sudah, 0);
+      tableRows.push([
+        { text: cat.label, options:{color:TEXT} },
+        { text: String(sudah), options:{color:GREEN_DEEP, align:"center"} },
+        { text: String(belum), options:{color:RED, align:"center"} },
+        { text: String(target), options:{color:DIM, align:"center"} }
+      ]);
+    });
+    s.addTable(tableRows, { x:0.5, y:0.95, w:12.3, fontSize:11, fontFace:"Arial", border:{type:"solid", color:"E4EAE6", pt:0.5}, autoPage:true });
+
+    // Slide 5: Daftar akan/sudah expired terdekat
+    const upcoming = computedAll.filter(c=>c.calc.expiry).sort((a,b)=>a.calc.expiry-b.calc.expiry).slice(0,18);
+    if(upcoming.length){
+      s = pptx.addSlide();
+      s.addText("Urutan Expired Terdekat", { x:0.5, y:0.3, w:12, h:0.5, fontSize:22, bold:true, color:TEXT, fontFace:"Arial" });
+      const rows = [[
+        { text:"No", options:{bold:true, fill:{color:"F3F6F4"}, color:TEXT} },
+        { text:"Nama", options:{bold:true, fill:{color:"F3F6F4"}, color:TEXT} },
+        { text:"Kategori", options:{bold:true, fill:{color:"F3F6F4"}, color:TEXT} },
+        { text:"Expired", options:{bold:true, fill:{color:"F3F6F4"}, color:TEXT} },
+        { text:"Status", options:{bold:true, fill:{color:"F3F6F4"}, color:TEXT} }
+      ]];
+      upcoming.forEach((c,i)=>{
+        const clr = c.calc.statusClass==="expired" ? RED : c.calc.statusClass==="soon" ? AMBER : GREEN_DEEP;
+        rows.push([
+          { text:String(i+1), options:{color:DIM, align:"center"} },
+          { text:c.item.holder||"-", options:{color:TEXT} },
+          { text:c.calc.cat.label, options:{color:DIM} },
+          { text:formatDMY(c.calc.expiry), options:{color:TEXT} },
+          { text:c.calc.statusLabel, options:{color:clr, bold:true} }
+        ]);
+      });
+      s.addTable(rows, { x:0.5, y:0.95, w:12.3, fontSize:10, fontFace:"Arial", border:{type:"solid", color:"E4EAE6", pt:0.5}, autoPage:true });
+    }
+
+    await pptx.writeFile({ fileName: "Laporan_Sertifikat_Keahlian_" + new Date().toISOString().slice(0,10) + ".pptx" });
+  }catch(e){
+    console.error(e);
+    alert("Gagal membuat laporan PPT: " + e.message);
+  }finally{
+    if(btn){ btn.disabled = false; btn.textContent = "⇩ Export Laporan (PPT)"; }
+  }
+}
+
+document.getElementById("btnExportPpt").addEventListener("click", exportReportToPpt);
 
 buildSidebar();
 buildCategoryPages();
 
 document.querySelectorAll(".navitem").forEach(nav=>{
-  nav.addEventListener("click", ()=> goToPage(nav.dataset.page));
+  nav.addEventListener("click", ()=>{
+    goToPage(nav.dataset.page);
+    closeSidebar();
+  });
 });
+
+const hamburgerBtn = document.getElementById("hamburgerBtn");
+const sidebarEl = document.getElementById("sidebarEl");
+const sidebarBackdrop = document.getElementById("sidebarBackdrop");
+
+function openSidebar(){ sidebarEl.classList.add("open"); sidebarBackdrop.classList.add("show"); }
+function closeSidebar(){ sidebarEl.classList.remove("open"); sidebarBackdrop.classList.remove("show"); }
+function toggleSidebar(){ sidebarEl.classList.contains("open") ? closeSidebar() : openSidebar(); }
+
+hamburgerBtn.addEventListener("click", toggleSidebar);
+sidebarBackdrop.addEventListener("click", closeSidebar);
 
 async function init(){
   try{
